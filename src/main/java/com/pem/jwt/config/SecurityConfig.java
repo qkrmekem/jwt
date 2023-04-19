@@ -1,5 +1,6 @@
 package com.pem.jwt.config;
 
+import com.pem.jwt.config.jwt.JwtAuthenticationFilter;
 import com.pem.jwt.filter.MyFilter1;
 import com.pem.jwt.filter.MyFilter3;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +54,9 @@ public class SecurityConfig{
         public void configure(HttpSecurity http) throws Exception {
             AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
             http
-                    .addFilter(corsConfig.corsFilter());
+                    .addFilter(corsConfig.corsFilter())
+                    // 그런데 얘는 AuthenticationManager라는 객체를 필요로 함
+                    .addFilter(new JwtAuthenticationFilter(authenticationManager));
         }
     }
 }
