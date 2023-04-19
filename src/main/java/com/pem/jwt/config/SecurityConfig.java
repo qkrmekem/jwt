@@ -19,11 +19,13 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 
 @Configuration
 @EnableWebSecurity // 시큐리티 활성화 -> 기본 스프링 필터체인에 등록
-@RequiredArgsConstructor
 public class SecurityConfig{
 
+    private CorsConfig corsConfig;
 
-    private final CorsConfig corsConfig;
+    public SecurityConfig(CorsConfig corsConfig) {
+        this.corsConfig = corsConfig;
+    }
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -55,7 +57,8 @@ public class SecurityConfig{
             AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
             http
                     .addFilter(corsConfig.corsFilter())
-                    // 그런데 얘는 AuthenticationManager라는 객체를 필요로 함
+                    // 추가
+                    // 얘는 AuthenticationManager라는 객체를 인자로 받음
                     .addFilter(new JwtAuthenticationFilter(authenticationManager));
         }
     }
