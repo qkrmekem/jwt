@@ -75,19 +75,19 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         System.out.println("successfulAuthentication이 실행됨 => 인증이 완료됨");
 
-        // 추가
         PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
 
         // RSA방식은 아니구 Hash암호방식
         String jwtToken = JWT.create()
-                .withSubject("pem토큰")
-                .withExpiresAt(new Date(System.currentTimeMillis() + (60000 * 10)))
+                .withSubject(principalDetails.getUsername())
+                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.EXPIRATION_TIME))
                 .withClaim("id", principalDetails.getUser().getId())
                 .withClaim("username", principalDetails.getUser().getUsername())
-                .sign(Algorithm.HMAC512("pem"));
+                .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
-        response.addHeader("Authorization", "Bearer "+jwtToken);
+        response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX+jwtToken);
 
         System.out.println("토큰 생성 후 헤더에 첨부 완료");
+//        super.successfulAuthentication(request,response,chain,authResult);
     }
 }

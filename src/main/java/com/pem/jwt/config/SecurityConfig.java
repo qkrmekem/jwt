@@ -1,8 +1,10 @@
 package com.pem.jwt.config;
 
 import com.pem.jwt.config.jwt.JwtAuthenticationFilter;
+import com.pem.jwt.config.jwt.JwtAuthorizationFilter;
 import com.pem.jwt.filter.MyFilter1;
 import com.pem.jwt.filter.MyFilter3;
+import com.pem.jwt.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,14 +24,16 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 public class SecurityConfig{
 
     private CorsConfig corsConfig;
+    private UserRepository userRepository;
 
-    public SecurityConfig(CorsConfig corsConfig) {
+    public SecurityConfig(CorsConfig corsConfig, UserRepository userRepository) {
         this.corsConfig = corsConfig;
+        this.userRepository = userRepository;
     }
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.addFilterBefore(new MyFilter3(), SecurityContextPersistenceFilter.class);
+//        http.addFilterBefore(new MyFilter3(), SecurityContextPersistenceFilter.class);
         return http
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -59,7 +63,8 @@ public class SecurityConfig{
                     .addFilter(corsConfig.corsFilter())
                     // 추가
                     // 얘는 AuthenticationManager라는 객체를 인자로 받음
-                    .addFilter(new JwtAuthenticationFilter(authenticationManager));
+                    .addFilter(new JwtAuthenticationFilter(authenticationManager))
+                    .addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository));
         }
     }
 }
